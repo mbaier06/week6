@@ -11,21 +11,35 @@ document.addEventListener('DOMContentLoaded', async function(event) {
   let todoText = document.querySelector('#todo').value
   console.log(todoText)
 
+  let docRef = await db.collection('todos').add({
+    text: todoText
+  })
+  // gives access to new ID of records (or docs) created in Firestore collection
+  let todoID = docRef.id
+  console.log(`new todo created: ${todoID}`)
+
   if (todoText.length > 0 ) {
     let todoList = document.querySelector('.todos')
     todoList.insertAdjacentHTML('beforeend', `
     <div class = "todo-${todoID} py-4 text-xl border-b-2 border-purple-500">
-      <a class="done p-2 text-sm bg-green-400 text-white">✓</a>
+      <a href = "#" class="done p-2 text-sm bg-green-400 text-white">✓</a>
       ${todoText}
     </div>
     `)
 
-    let docRef = await db.collection('todos').add({
-      text: todoText
-    })
+      // Step 4: Add code to allow completing todos (along with added HTML to 52-54)
+    let todoLink = document.querySelector(`.todo-${todoID} .done`)
+    // console.log(todoLink)
+    todoLink.addEventListener('click', async function(event){
+    event.preventDefault()
+    console.log(`${todoID} was clicked`)
 
-    let todoID = docRef.id
-    console.log(`new todo created: ${todoID}`)
+    document.querySelector(`.todo-${todoID}`).classList.add('opacity-20')
+
+    await db.collection('todos').doc(todoID).delete()
+  })
+
+
   }
   // watch 7:40 onwards for order mattering - moving todoLink etc!!
   // clearing submit form
@@ -55,17 +69,7 @@ document.addEventListener('DOMContentLoaded', async function(event) {
   </div>
   `)
 
-  // Step 4: Add code to allow completing todos
-  let todoLink = document.querySelector(`.todo-${todoID} .done`)
-  // console.log(todoLink)
-  todoLink.addEventListener('click', async function(event){
-    event.preventDefault()
-    console.log(`${todoID} was clicked`)
 
-    document.querySelector(`.todo-${todoID}`).classList.add('opacity-20')
-
-    await db.collection('todos').doc(todoID).delete()
-  })
   }
   // Step 3: Add code to Step 1 to add todo to Firestore
   // up above lines 22-27 i think
